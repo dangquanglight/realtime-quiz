@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Vocabulary Quiz</title>
+</head>
+
+<body x-init="">
+    <section class="bg-gray-50 dark:bg-gray-900">
+        <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+            <p class="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
+                Welcome to Real-time Vocabulary Quiz
+            </p>
+            <div
+                class="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
+                <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
+                    <h1
+                        class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
+                        Let's Create A Quiz Room
+                    </h1>
+                    <form class="space-y-4 md:space-y-6" @submit.prevent="createNewQuizRoom">
+                        <div>
+                            <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                Your name
+                            </label>
+                            <input type="text" name="name" id="name"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                placeholder="Your name or nickname" required="">
+                        </div>
+
+                        <button
+                            class="w-full relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800">
+                            <span
+                                class="w-full relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
+                                Create A New Room
+                            </span>
+                        </button>
+                    </form>
+
+                    <hr>
+
+                    <h1
+                        class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
+                        Join An Existing Quiz Room
+                    </h1>
+
+                    <form class="space-y-4 md:space-y-6" @submit.prevent="joinExistingRoom">
+                        <div>
+                            <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                Quiz Room ID
+                            </label>
+                            <input type="text" name="name" id="name"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                required="">
+                        </div>
+
+                        <button
+                            class="w-full relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-cyan-500 to-blue-500 group-hover:from-cyan-500 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-cyan-200 dark:focus:ring-cyan-800">
+                            <span
+                                class="w-full relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
+                                Join Now
+                            </span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
+
+    <script>
+        function generateRoomId() {
+            return 'room-' + Math.random().toString(36).slice(2);
+        }
+
+        let myQuizRoomCode = generateRoomId();
+        function createNewQuizRoom() {
+            let myQuizRoomChannel = realtimeAbly.channels.get(
+                `${myQuizRoomCode}:primary`
+            ); console.log(myQuizRoomChannel);
+            let hostAdminChannel = this.realtime.channels.get(
+                `${myQuizRoomCode}:host`
+            );
+
+            myQuizRoomChannel.subscribe('thread-ready', () => {
+                handleQuizRoomReady();
+            });
+
+            enterMainThread();
+        }
+
+        function enterMainThread() {
+            this.globalQuizCh = this.realtime.channels.get(this.globalQuizChName);
+            this.globalQuizCh.presence.enter({
+                nickname: this.hostNickname,
+                roomCode: this.myQuizRoomCode
+            });
+        }
+
+        function handleQuizRoomReady() {
+            this.isRoomReady = true;
+            this.globalQuizCh.detach();
+            this.enterGameRoomAndSubscribeToEvents();
+            this.playerLink = `${this.playerLinkBase}?quizCode=${this.myQuizRoomCode}`;
+            if (this.quizType == 'CustomQuiz') {
+                let questions = this.customQuizQuestions;
+                this.hostAdminCh.publish('quiz-questions', {
+                    questions
+                });
+            }
+        }
+
+        function joinExistingRoom() {
+            alert('test joinExistingRoom');
+        }
+    </script>
+</body>
+
+</html>

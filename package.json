@@ -1,0 +1,26 @@
+{
+  "name": "real-time-vocabulary-quiz",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dangquanglight/realtime-quiz.git"
+  },
+  "author": "Quang Le Dang",
+  "license": "ISC",
+  "dependencies": {
+    "ably": "^2.6.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "path": "^0.12.7",
+    "serve-static": "^1.16.2"
+  }
+}
